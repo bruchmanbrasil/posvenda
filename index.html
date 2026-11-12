@@ -1086,23 +1086,75 @@
         // ============================================
         // ENVIO FINAL
         // ============================================
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzTj9TvV3OVSKQPQclQGzUOOjho83ZiRjsrD_l-faNGsbVFz9qLvGGEQUDp-f_jZwbHgQ/exec'; // ex.: https://script.google.com/macros/s/XXXX/exec
 
-            // Valida a seção atual (7) antes de enviar
-            if (!validateSection(currentSection)) return;
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!validateSection(currentSection)) return;
 
-            // Coletar dados
-            const formData = new FormData(form);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                if (data[key]) {
-                    if (Array.isArray(data[key])) data[key].push(value);
-                    else data[key] = [data[key], value];
-                } else {
-                    data[key] = value;
-                }
-            }
+    const formData = new FormData(form);
+    const data = {};
+    for (let [key, value] of formData.entries()) {
+        if (data[key]) {
+            if (Array.isArray(data[key])) data[key].push(value);
+            else data[key] = [data[key], value];
+        } else {
+            data[key] = value;
+        }
+    }
+
+    const redFlags = checkRedFlags(data);
+    const payload = { ...data, redFlags, enviado_em: new Date().toISOString() };
+
+    const btnSubmit = form.querySelector('.btn-submit');
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Enviando...';
+
+    // 💾 GRAVA NA BASE (Google Sheets via Apps Script)
+    fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(r => console.log('✅ Gravado na base. ID:', r.id))
+    .catch(err => console.error('⚠️ Falha ao gravar:', err))
+    .finally(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Enviar avaliação ✨';
+        mostrarTelaFinal(data, redFlags);
+    });
+});
+
+function mostrarTelaFinal(data, redFlags) {
+    const firstName = (data.nome_cliente || '').trim().split(' ')[0];
+    if (firstName) document.getElementById('success-title').textContent = `Obrigado, ${firstName}!`;
+
+    form.style.display = 'none';
+    document.getElementById('progress-container').style.display = 'none';
+    document.getElementById('success-screen').classList.add('active');
+
+    const technicalFlags = ['clinical','adaptation','first_multifocal','first_glasses','big_change','low_usage'];
+    const commercialFlags = ['commercial','nps'];
+    let alertHTML = '';
+
+    if (redFlags.some(f => technicalFlags.includes(f))) {
+        alertHTML += `<div class="alert-box warning"><strong>👨⚕️ Nossa equipe técnica foi notificada!</strong><br>
+        A equipe da Bruchman Eyewear entrará em contato pelo telefone/WhatsApp informado para orientar
+        ou agendar uma <strong>conferência de montagem, DNP, altura e ajuste anatômico</strong>, sem custo.</div>`;
+    }
+    if (redFlags.some(f => commercialFlags.includes(f))) {
+        alertHTML += `<div class="alert-box warning"><strong>📞 Seu feedback é prioridade!</strong><br>
+        Um membro da nossa equipe entrará em contato em breve para entender melhor sua experiência.</div>`;
+    }
+    if (!alertHTML) {
+        alertHTML = `<div class="alert-box success"><strong>🎉 Que maravilha!</strong><br>
+        Ficamos felizes que sua adaptação está indo bem. Continue usando seus óculos e aproveite a visão nítida!</div>`;
+    }
+
+    document.getElementById('dynamic-alert').innerHTML = alertHTML;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
             // 🔴 VERIFICAR ALERTAS VERMELHOS
             const redFlags = checkRedFlags(data);
