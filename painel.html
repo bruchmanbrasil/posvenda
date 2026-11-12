@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Pós-Venda | Bruchman Eyewear</title>
+<style>
+  :root{--navy:#232d5f;--navy-dark:#1b2349;--gold:#c9a24b;--gold-light:#e6c87e;--cream:#f7f4ee;
+  --card:#fff;--muted:#6b7280;--border:#e5e1d8;--ok:#16a34a;--warn:#f59e0b;--bad:#dc2626;--r:14px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--cream);color:#26324b;padding-bottom:40px}
+  .topo{background:linear-gradient(135deg,var(--navy-dark),var(--navy));color:#fff;padding:16px 22px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    border-bottom:4px solid var(--gold);position:sticky;top:0;z-index:10}
+  .topo b{font-family:Georgia,serif;letter-spacing:2px;font-size:18px;color:var(--gold-light)}
+  .topo small{display:block;font-size:11px;letter-spacing:3px;color:#fff;opacity:.8}
+  .live{font-size:12px;display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#22c55e;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  main{max-width:1080px;margin:22px auto;padding:0 16px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px}
+  .kpi{background:var(--card);border-radius:var(--r);padding:16px;border-top:4px solid var(--gold);
+    box-shadow:0 4px 10px rgba(35,45,95,.08);text-align:center}
+  .kpi .v{font-size:30px;font-weight:800;color:var(--navy);font-family:Georgia,serif}
+  .kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700}
+  .kpi .s{font-size:11px;color:var(--muted);margin-top:4px}
+  .kpi.bad{border-top-color:var(--bad)} .kpi.bad .v{color:var(--bad)}
+  .kpi.ok{border-top-color:var(--ok)} .kpi.ok .v{color:var(--ok)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px}
+  .panel{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:0 4px 10px rgba(35,45,95,.08)}
+  .panel h3{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--navy);margin-bottom:14px;
+    border-bottom:2px solid var(--gold);padding-bottom:8px}
+  .alerta{border:1px solid #fecaca;background:#fef2f2;border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px}
+  .alerta b{color:#991b1b}
+  .alerta .flags{color:#7f1d1d;font-size:12px;margin:4px 0}
+  .alerta .acoes{display:flex;gap:8px;margin-top:8px}
+  .btn{border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .btn.wa{background:#25d366;color:#fff} .btn.res{background:var(--navy);color:var(--gold-light)}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+  .bar-row .lbl{width:150px;color:var(--muted);flex-shrink:0}
+  .bar-row .track{flex:1;background:var(--border);border-radius:6px;height:14px;overflow:hidden}
+  .bar-row .fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:6px}
+  .bar-row .num{width:28px;text-align:right;font-weight:700;color:var(--navy)}
+  .cols{display:flex;align-items:flex-end;gap:6px;height:130px;padding-top:10px}
+  .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+  .col .c{width:100%;background:linear-gradient(180deg,var(--gold-light),var(--gold));border-radius:5px 5px 0 0;min-height:3px}
+  .col .d{font-size:9px;color:var(--muted)}
+  .feed li{list-style:none;font-size:13px;padding:8px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;gap:8px}
+  .feed .nps{font-weight:800} .nps.p{color:var(--ok)} .nps.n{color:var(--warn)} .nps.d{color:var(--bad)}
+  .vazio{font-size:13px;color:var(--muted);text-align:center;padding:14px}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div><b>BRUCHMAN EYEWEAR</b><small>PAINEL PÓS-VENDA • TEMPO REAL</small></div>
+  <div class="live"><span class="dot"></span> Atualizado às <span id="upd">--:--:--</span></div>
+</header>
+
+<main>
+  <!-- KPIs -->
+  <section class="kpis">
+    <div class="kpi"><div class="v" id="kTotal">–</div><div class="l">Respostas</div><div class="s" id="kHoje">hoje: –</div></div>
+    <div class="kpi" id="cardNps"><div class="v" id="kNps">–</div><div class="l">NPS</div><div class="s" id="kNpsDet">–</div></div>
+    <div class="kpi"><div class="v" id="kCsat1">–</div><div class="l">CSAT Atendimento</div><div class="s">escala 1–5</div></div>
+    <div class="kpi"><div class="v" id="kCsat2">–</div><div class="l">CSAT Entrega/Armação</div><div class="s">escala 1–5</div></div>
+    <div class="kpi" id="cardCes"><div class="v" id="kCes">–</div><div class="l">CES Adaptação</div><div class="s" id="kCesPct">–</div></div>
+    <div class="kpi bad" id="cardAlertas"><div class="v" id="kAlertas">–</div><div class="l">Alertas Abertos</div><div class="s">ação em 24h</div></div>
+  </section>
+
+  <section class="grid2">
+    <!-- ALERTAS -->
+    <div class="panel">
+      <h3>🚨 Alertas vermelhos abertos</h3>
+      <div id="boxAlertas"><div class="vazio">Carregando…</div></div>
+    </div>
+    <!-- SINTOMAS -->
+    <div class="panel">
+      <h3>😵‍💫 Sintomas relatados</h3>
+      <div id="boxSintomas"><div class="vazio">Carregando…</div></div>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <!-- VOLUME 14 DIAS -->
+    <div class="panel">
+      <h3>📈 Respostas — últimos 14 dias</h3>
+      <div class="cols" id="boxDias"></div>
+    </div>
+    <!-- MIX + FEED -->
+    <div class="panel">
+      <h3>🔀 Mix de lentes</h3>
+      <div id="boxLentes"></div>
+      <h3 style="margin-top:18px">🕑 Últimas respostas</h3>
+      <ul class="feed" id="boxFeed"></ul>
+    </div>
+  </section>
+</main>
+
+<script>
+const API_URL = 'COLE_AQUI_SUA_URL_EXEC'; // mesma URL do formulário
+
+const ROTULO_SINTOMA = {
+  tontura:'Tontura / chão inclinado', dor_cabeca:'Dor de cabeça', visao_turva:'Visão turva',
+  reflexos:'Reflexos noturnos', armacao_incomodo:'Armação incomoda', nenhum:'Nenhum sintoma ✅'
+};
+const ROTULO_LENTE = { longe:'Só longe', perto:'Só perto', ocupacional:'Ocupacional', multifocal:'Multifocal' };
+
+function waLink(fone){
+  let d = (fone||'').replace(/\D/g,'');
+  if (d.length <= 11) d = '55' + d;
+  return 'https://wa.me/' + d;
+}
+
+function render(k){
+  document.getElementById('upd').textContent = new Date().toLocaleTimeString('pt-BR');
+
+  document.getElementById('kTotal').textContent = k.total;
+  document.getElementById('kHoje').textContent = 'hoje: ' + k.hoje;
+
+  const nps = k.nps.score;
+  document.getElementById('kNps').textContent = nps;
+  document.getElementById('kNpsDet').textContent =
+    `${k.nps.promotores} prom • ${k.nps.neutros} neu • ${k.nps.detratores} det`;
+  const cN = document.getElementById('cardNps');
+  cN.className = 'kpi ' + (nps >= 75 ? 'ok' : nps >= 0 ? '' : 'bad');
+
+  document.getElementById('kCsat1').textContent = k.csat_atendimento;
+  document.getElementById('kCsat2').textContent = k.csat_entrega;
+  document.getElementById('kCes').textContent = k.ces_adaptacao;
+  document.getElementById('kCesPct').textContent = k.pct_adaptacao_dificil + '% adaptação difícil';
+  document.getElementById('cardCes').className = 'kpi ' + (k.ces_adaptacao >= 4 ? 'ok' : k.ces_adaptacao >= 3 ? '' : 'bad');
+  document.getElementById('kAlertas').textContent = k.alertas_abertos.length;
+
+  // Alertas
+  const box = document.getElementById('boxAlertas');
+  box.innerHTML = k.alertas_abertos.length ? k.alertas_abertos.map(a => `
+    <div class="alerta">
+      <b>${a.nome}</b> • ${a.quando} • ${ROTULO_LENTE[a.lente] || a.lente}
+      <div class="flags"> ${a.flags.split('; ').join(' | ')}</div>
+      <div class="acoes">
+        <button class="btn wa" onclick="window.open('${waLink(a.telefone)}','_blank')">💬 WhatsApp</button>
+        <button class="btn res" onclick="resolver('${a.id}')">✔ Resolver</button>
+      </div>
+    </div>`).join('')
+    : '<div class="vazio">✅ Nenhum alerta aberto no momento.</div>';
+
+  // Sintomas (barras)
+  const sint = Object.entries(k.sintomas).sort((a,b)=>b[1]-a[1]);
+  const maxS = sint.length ? sint[0][1] : 0;
+  document.getElementById('boxSintomas').innerHTML = sint.length ? sint.map(([s,n]) => `
+    <div class="bar-row">
+      <span class="lbl">${ROTULO_SINTOMA[s] || s}</span>
+      <span class="track"><span class="fill" style="width:${(n/maxS)*100}%"></span></span>
+      <span class="num">${n}</span>
+    </div>`).join('') : '<div class="vazio">Sem dados ainda.</div>';
+
+  // Volume 14 dias
+  const dias = Object.entries(k.por_dia);
+  const maxD = Math.max(...dias.map(d=>d[1]), 1);
+  document.getElementById('boxDias').innerHTML = dias.map(([d,n]) => `
+    <div class="col" title="${d}: ${n}">
+      <div class="c" style="height:${(n/maxD)*100}%"></div>
+      <div class="d">${d.slice(0,2)}</div>
+    </div>`).join('');
+
+  // Mix de lentes
+  const lent = Object.entries(k.lentes).sort((a,b)=>b[1]-a[1]);
+  const maxL = lent.length ? lent[0][1] : 0;
+  document.getElementById('boxLentes').innerHTML = lent.map(([l,n]) => `
+    <div class="bar-row">
+      <span class="lbl">${ROTULO_LENTE[l] || l}</span>
+      <span class="track"><span class="fill" style="width:${(n/maxL)*100}%"></span></span>
+      <span class="num">${n}</span>
+    </div>`).join('') || '<div class="vazio">Sem dados ainda.</div>';
+
+  // Feed
+  document.getElementById('boxFeed').innerHTML = k.ultimas.map(u => {
+    const c = u.nps >= 9 ? 'p' : u.nps >= 7 ? 'n' : 'd';
+    return `<li><span>${u.nome} • ${u.quando} • ${ROTULO_LENTE[u.lente] || u.lente}</span>
+      <span class="nps ${c}">NPS ${u.nps}</span></li>`;
+  }).join('') || '<div class="vazio">Sem respostas ainda.</div>';
+}
+
+function resolver(id){
+  fetch(API_URL + '?action=resolver&id=' + encodeURIComponent(id))
+    .then(() => carregar());
+}
+
+function carregar(){
+  fetch(API_URL + '?action=dashboard&v=' + Date.now())
+    .then(r => r.json())
+    .then(render)
+    .catch(err => console.error('Erro ao carregar painel:', err));
+}
+
+carregar();
+setInterval(carregar, 30000); // tempo real: refresh a cada 30s
+</script>
+</body>
+</html>
